@@ -1,7 +1,15 @@
+/**
+ * フォーム制御JS
+ *
+ * Author : Takeshi Tomida <tomipetit@gmail.com>
+ * Create : 2020.08
+ * Ver 2.0
+ * 
+ */
 import serialize from 'form-serialize'
+import SmoothScroll from 'smooth-scroll'
 import FormValueChk from './formValueChk'
 import StrReplace from './strReplace'
-import SmoothScroll from 'smooth-scroll'
 const formValueChk = new FormValueChk
 
 const smoothScroll = new SmoothScroll()
