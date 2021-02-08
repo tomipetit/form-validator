@@ -1,9 +1,7 @@
 /**
  * フォームの入力値チェック用関数群
  *
- * Author : T.Tomida <t-tomida@shinwatec.net>
- * Company : Shinwatec Inc.
- * Copyright : Copyright(c) 2017 Shinwatec Inc.
+ * Author : Takeshi Tomida <tomipetit@gmail.com>
  * Create : 2017.08
  */
 
