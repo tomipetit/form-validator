@@ -4,7 +4,7 @@
  * Author : Takeshi Tomida <tomipetit@gmail.com>
  * Create : 2020.08
  * Ver 2.0
- * 
+ * require : form-serialize, smooth-scroll
  */
 import serialize from 'form-serialize'
 import SmoothScroll from 'smooth-scroll'
@@ -162,12 +162,10 @@ export default class {
                     break
                 default:
             }
-            console.log(_keyObjs)
             Object.keys(_keyObjs).forEach(_name => {
                 _keyObjs[_name].forEach(_obj => {
                     onAction.forEach(_onAction => {
                         _obj.addEventListener(_onAction, e => {
-                            console.log(e)
                             let values = this.getValues(elements)
                             this.inputChk(values, baseObj, itemLabel)
                         })
