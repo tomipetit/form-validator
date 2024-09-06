@@ -57,7 +57,7 @@ export default class {
                 this.config.formObj.submit()
                 return
             }
-            let formData = serialize(this.config.formObj, { hash: true })
+            let formData = serialize(this.config.formObj, { hash: true, empty: true })
             this.config.submitAction(e.currentTarget, formData)
         })
         // 下書きボタンのアクション定義
@@ -71,7 +71,7 @@ export default class {
                 if (!this.config.submitAction) {
                     return true
                 }
-                let formData = serialize(this.config.formObj, { hash: true })
+                let formData = serialize(this.config.formObj, { hash: true, empty: true })
                 this.config.submitAction(e.currentTarget, formData)
             })
         }
