@@ -65,7 +65,7 @@ export default class {
         // 下書きボタンのアクション定義
         if (this.config.submitAreaObj.querySelector('.button-draft')) {
             this.config.submitAreaObj.querySelector('.button-draft').addEventListener('click', async e => {
-                if (!this.config.beforeSubmitAction) {
+                if (this.config.beforeSubmitAction) {
                     await this.config.beforeSubmitAction()
                 }
                 this.setPublish(0)
