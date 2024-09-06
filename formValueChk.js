@@ -93,7 +93,9 @@ export default class {
         }
         return resultObj
     }
-
+    async tel(checkObj) {
+        return this.phone(checkObj)
+    }
     async creditcard(checkObj) {
         const check = str => new RegExp(/^[0-9０-９\s]+$/).test(str)
         const check2 = str => {
@@ -391,7 +393,7 @@ export default class {
         return resultObj
     }
     async privacy(checkObj) {
-        let check = value => value.length > 1
+        let check = value => value.length >= 1
         let resultObj = {}
         if (check(checkObj.value)) {
             resultObj.result = true

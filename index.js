@@ -33,8 +33,8 @@ export default class {
         })
 
         // 送信ボタンのアクション定義
-        this.config.submitAreaObj.querySelector('.button-submit').addEventListener('click', async e => {
-            e.preventDefault()
+        this.config.formObj.addEventListener('submit', async e => {
+            //e.preventDefault()
             if (this.config.beforeSubmitAction) {
                 await this.config.beforeSubmitAction()
             }
@@ -43,7 +43,9 @@ export default class {
             if (count) {
                 let scrollObj = this.config.formObj.querySelector('.error-message')
                 smoothScroll.animateScroll(this.func.closest(scrollObj, 'item'))
-                return false
+                e.stopPropagation();
+                e.preventDefault();
+                return;
             }
             this.setPublish(1)
 
@@ -51,13 +53,13 @@ export default class {
             if (!this.config.submitAction) {
                 if(this.config.renderConfirmMessage){
                     if (!window.confirm(this.config.submitConfirmMessage)) {
-                        return false
-                    }
+                        e.stopPropagation();
+                        e.preventDefault();
+                        return;                    }
                 }
-                this.config.formObj.submit()
-                return
+                return true;
             }
-            let formData = serialize(this.config.formObj, { hash: true })
+            let formData = serialize(this.config.formObj, { hash: true, empty: true })
             this.config.submitAction(e.currentTarget, formData)
         })
         // 下書きボタンのアクション定義
@@ -71,10 +73,11 @@ export default class {
                 if (!this.config.submitAction) {
                     return true
                 }
-                let formData = serialize(this.config.formObj, { hash: true })
+                let formData = serialize(this.config.formObj, { hash: true, empty: true })
                 this.config.submitAction(e.currentTarget, formData)
             })
         }
+		this.inputChkAll(false)
     }
     setPublish(value) {
         let obj
@@ -115,13 +118,11 @@ export default class {
                 }
             },
             getSurfaceText: obj => {
-                let result = ""
-                obj.childNodes.forEach(_elm => {
-                    if (_elm.nodeName == "#text") {
-                        result = _elm.nodeValue;
-                    }
-                })
-                return result
+                if(obj.querySelector('p')){
+                    return obj.querySelector('p').textContent;
+                }else{
+                    return obj.textContent;
+                }
             },
             remove: (obj, selector) => {
                 let tmp = obj.querySelectorAll(selector)
@@ -224,8 +225,9 @@ export default class {
         })
         return typeList
     }
-    async inputChk(values, parentObj, itemLabel) {
-        if (!parentObj.hasAttribute('data-chk')) {
+    async inputChk(values, parentObj, itemLabel, isRender = true) {
+        if (!parentObj.hasAttribute('data-chk') || parentObj.getAttribute('data-chk') == '') {
+            this.func.closest(parentObj, 'item').classList.add('pass')
             return false
         }
         let chkList = parentObj.getAttribute('data-chk').split(',').filter(_val => _val)
@@ -237,7 +239,15 @@ export default class {
 
         parentObj.setAttribute('data-errors', errors.length)
 
-        this.renderErrorMessage(errors, parentObj)
+        if(errors.length === 0){
+            this.func.closest(parentObj, 'item').classList.add('pass')
+        }else{
+            this.func.closest(parentObj, 'item').classList.remove('pass')
+        }
+
+        if(isRender){
+            this.renderErrorMessage(errors, parentObj)
+        }
         this.inputChkAllCnt()
         let submitObj = this.config.submitAreaObj.querySelector('.button-submit')
         if(this.submitChk()){
@@ -260,7 +270,7 @@ export default class {
         })
     }
     inputChkAllCnt() {
-        let errorCnt = [...document.querySelectorAll('.input-check-container[data-errors]')].map(_obj => _obj.getAttribute('data-errors')).filter(_value => Number(_value) != 0).length
+        let errorCnt = [...document.querySelectorAll('.input-check-container[data-errors]:not(.nochk)')].map(_obj => _obj.getAttribute('data-errors')).filter(_value => Number(_value) != 0).length
         
         if (!this.config.renderErrorCnt) {
             return errorCnt
@@ -280,8 +290,8 @@ export default class {
     }
 
     submitChk(){
-        let cnt = [...document.querySelectorAll('.input-check-container')].filter(_obj => {
-            return !_obj.hasAttribute('data-errors') || Number(_obj.getAttribute('data-errors')) > 0
+        let cnt = [...document.querySelectorAll('.input-check-container[data-chk]:not(.nochk)')].filter(_obj => {
+            return _obj.getAttribute('data-chk') && (!_obj.hasAttribute('data-errors') || Number(_obj.getAttribute('data-errors')) > 0)
         }).length
 
         return !Boolean(cnt)
@@ -292,10 +302,10 @@ export default class {
         switch (tag) {
             case 'checkbox':
             case 'radio':
-                labels = [obj[0].getAttribute('data-name')]
+                labels = [obj[0].getAttribute('data-label')]
                 break
             default:
-                labels = obj.map(_obj => _obj.getAttribute('data-name'))
+                labels = obj.map(_obj => _obj.getAttribute('data-label'))
         }
         return labels
     }
@@ -347,18 +357,18 @@ export default class {
         })
         return values
     }
-    inputChkAll() {
-        return Promise.all([...this.config.formObj.querySelectorAll('.input-check-container')].map(async baseObj => {
+    inputChkAll(isRender = true) {
+        return Promise.all([...this.config.formObj.querySelectorAll('.input-check-container:not(.nochk)')].map(async baseObj => {
             let itemLabel = this.getLabel(baseObj)
             let elements = this.getFormElement(baseObj)
             let values = this.getValues(elements)
-            return await this.inputChk(values, baseObj, itemLabel)
+            return await this.inputChk(values, baseObj, itemLabel, isRender)
         }))
     }
     setReplaceAction(baseObj) {
         let onAction = []
         baseObj.querySelectorAll('input,textarea,select').forEach(_obj => {
-            let repKeys = _obj.hasAttribute('data-replace') ? _obj.getAttribute('data-replace').split(',') : []
+            let repKeys = _obj.hasAttribute('data-replace') ? _obj.getAttribute('data-replace').split(',').map(_val => _val.trim()) : []
 
             if (!repKeys.length) {
                 return false
